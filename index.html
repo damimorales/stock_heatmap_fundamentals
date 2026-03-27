@@ -1,415 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>US Market Heatmap – Live Data</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,sans-serif;background:#0d0d0d;color:#e0e0e0;min-height:100vh;padding:16px}
-    .title{font-size:20px;font-weight:600;color:#fff;margin-bottom:2px}
-    .subtitle{font-size:12px;color:#555;margin-bottom:14px}
-    .controls{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-    .btn{background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa;padding:5px 13px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
-    .btn:hover{background:#222;color:#fff}
-    .btn.active{background:#1a2a1a;border-color:#2ecc71;color:#2ecc71}
-    .sep{width:1px;height:18px;background:#2a2a2a;margin:0 2px}
-    .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-    .tab{background:#161616;border:1px solid #222;color:#777;padding:4px 13px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
-    .tab:hover{color:#ccc;border-color:#444}
-    .tab.active{background:#1a2a1a;border-color:#2ecc71;color:#2ecc71}
-    .sector-filter{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
-    .sf{background:#111;border:1px solid #1e1e1e;color:#555;padding:3px 10px;border-radius:12px;cursor:pointer;font-size:11px;transition:all .15s}
-    .sf.active{border-color:#444;color:#ccc;background:#1e1e1e}
-    .sort-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:#555}
-    .sort-row select{background:#161616;border:1px solid #2a2a2a;color:#aaa;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;outline:none}
-    .legend{display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:11px;color:#444}
-    .legend-bar{display:flex;gap:2px}
-    .lseg{width:22px;height:9px;border-radius:2px}
-    .status-bar{font-size:11px;color:#444;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-    .live-dot{width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block;animation:pulse 2s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-    .err-dot{background:#e74c3c;animation:none}
-    .refresh-btn{background:#161616;border:1px solid #2a2a2a;color:#666;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:11px}
-    .refresh-btn:hover{color:#aaa;border-color:#444}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:3px}
-    .cell{border-radius:7px;padding:8px 10px;cursor:pointer;transition:transform .12s,filter .12s;min-height:70px;display:flex;flex-direction:column;justify-content:space-between}
-    .cell:hover{transform:scale(1.05);filter:brightness(1.2);z-index:10;position:relative}
-    .cell-ticker{font-size:11px;font-weight:700;letter-spacing:.4px}
-    .cell-name{font-size:9px;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-    .cell-val{font-size:17px;font-weight:700;line-height:1;margin-top:4px}
-    .cell-bot{display:flex;gap:4px;align-items:center;margin-top:2px}
-    .cell-price{font-size:9px;opacity:.6}
-    .cell-chg{font-size:9px;font-weight:600}
-    .skeleton{background:linear-gradient(90deg,#1a1a1a 25%,#252525 50%,#1a1a1a 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:7px;min-height:70px}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .tt{position:fixed;background:#191919;border:1px solid #2a2a2a;border-radius:10px;padding:13px 16px;font-size:12px;z-index:1000;pointer-events:none;min-width:215px;display:none}
-    .tt-head{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
-    .tt-sub{font-size:11px;color:#555;margin-bottom:9px}
-    .tt-row{display:flex;justify-content:space-between;gap:16px;padding:3px 0;border-bottom:1px solid #1e1e1e}
-    .tt-row:last-child{border-bottom:none}
-    .tt-l{color:#666}
-    .g{color:#2ecc71}.w{color:#f39c12}.b{color:#e74c3c}
-    .api-notice{background:#1a1500;border:1px solid #3a3000;border-radius:8px;padding:10px 14px;font-size:11px;color:#888;margin-bottom:12px;display:none}
-    .api-notice a{color:#f39c12;text-decoration:none}
-    </style>
-  </head>
-  <body>
-    <div class="title">🇺🇸 US Market Heatmap <span style="font-size:12px;color:#2ecc71;font-weight:400">LIVE</span>span></div>div>
-    <div class="subtitle" id="subtitleTxt">Top 50 · Cargando datos reales…</div>div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0d0d0d;color:#e0e0e0;min-height:100vh;padding:16px}
+.title{font-size:20px;font-weight:600;color:#fff;margin-bottom:2px}
+.subtitle{font-size:12px;color:#555;margin-bottom:14px}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.btn{background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa;padding:5px 13px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
+.btn:hover{background:#222;color:#fff}
+.btn.active{background:#1a2a1a;border-color:#2ecc71;color:#2ecc71}
+.sep{width:1px;height:18px;background:#2a2a2a;margin:0 2px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{background:#161616;border:1px solid #222;color:#777;padding:4px 13px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
+.tab:hover{color:#ccc;border-color:#444}
+.tab.active{background:#1a2a1a;border-color:#2ecc71;color:#2ecc71}
+.sector-filter{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.sf{background:#111;border:1px solid #1e1e1e;color:#555;padding:3px 10px;border-radius:12px;cursor:pointer;font-size:11px;transition:all .15s}
+.sf.active{border-color:#444;color:#ccc;background:#1e1e1e}
+.sort-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:#555}
+.sort-row select{background:#161616;border:1px solid #2a2a2a;color:#aaa;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;outline:none}
+.legend{display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:11px;color:#444}
+.legend-bar{display:flex;gap:2px}
+.lseg{width:22px;height:9px;border-radius:2px}
+.status-bar{font-size:11px;color:#444;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:3px}
+.cell{border-radius:7px;padding:8px 10px;cursor:pointer;transition:transform .12s,filter .12s;min-height:70px;display:flex;flex-direction:column;justify-content:space-between}
+.cell:hover{transform:scale(1.05);filter:brightness(1.2);z-index:10;position:relative}
+.cell-ticker{font-size:11px;font-weight:700;letter-spacing:.4px}
+.cell-name{font-size:9px;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.cell-val{font-size:17px;font-weight:700;line-height:1;margin-top:4px}
+.cell-bot{display:flex;gap:4px;align-items:center;margin-top:2px}
+.cell-price{font-size:9px;opacity:.6}
+.cell-chg{font-size:9px;font-weight:600}
+.tt{position:fixed;background:#191919;border:1px solid #2a2a2a;border-radius:10px;padding:13px 16px;font-size:12px;z-index:1000;pointer-events:none;min-width:215px;display:none}
+.tt-head{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
+.tt-sub{font-size:11px;color:#555;margin-bottom:9px}
+.tt-row{display:flex;justify-content:space-between;gap:16px;padding:3px 0;border-bottom:1px solid #1e1e1e}
+.tt-row:last-child{border-bottom:none}
+.tt-l{color:#666}
+.g{color:#2ecc71}.w{color:#f39c12}.b{color:#e74c3c}
+</style>
+</head>
+<body>
 
-    <div class="api-notice" id="apiNotice">
-        ⚠️ CORS bloqueado en este navegador. Los datos se muestran con la última caché disponible.
-        Para datos en tiempo real usá la extensión <a href="https://cors-anywhere.herokuapp.com/" target="_blank">CORS Anywhere</a>a> o desplegá el dashboard en un servidor.
-    </div>div>
+<div class="title">🇺🇸 US Market Heatmap</div>
+<div class="subtitle">Top 50 · Precios al cierre 24 Mar 2026 · Actualizado por Claude</div>
 
-    <div class="controls">
-        <button class="btn active" onclick="setSize('equal',this)">Size: Igual</button>button>
-        <button class="btn" onclick="setSize('mktcap',this)">Size: Mkt Cap</button>button>
-        <div class="sep"></div>div>
-        <button class="refresh-btn" onclick="fetchAllData()">⟳ Actualizar</button>button>
-    </div>div>
+<div class="controls">
+  <button class="btn active" onclick="setSize('equal',this)">Size: Igual</button>
+  <button class="btn" onclick="setSize('mktcap',this)">Size: Mkt Cap</button>
+</div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="setMetric('pe',this)">P/E Fwd</div>div>
-        <div class="tab" onclick="setMetric('peg',this)">PEG</div>div>
-        <div class="tab" onclick="setMetric('pfcf',this)">P/FCF</div>div>
-        <div class="tab" onclick="setMetric('ps',this)">P/Sales</div>div>
-        <div class="tab" onclick="setMetric('chg',this)">% Día</div>div>
-    </div>div>
+<div class="tabs">
+  <div class="tab active" onclick="setMetric('pe',this)">P/E Fwd</div>
+  <div class="tab" onclick="setMetric('peg',this)">PEG</div>
+  <div class="tab" onclick="setMetric('pfcf',this)">P/FCF</div>
+  <div class="tab" onclick="setMetric('ps',this)">P/Sales</div>
+  <div class="tab" onclick="setMetric('chg',this)">% Día</div>
+</div>
 
-    <div class="sort-row">
-        <span>Sort:</span>
-      <select id="sortSel" onchange="renderGrid()">
-          <option value="mktcap">Mkt Cap ↓</option>option>
-          <option value="pe">P/E Fwd ↓</option>option>
-          <option value="peg">PEG ↓</option>option>
-          <option value="chg">% Hoy ↓</option>option>
-          <option value="ticker">Ticker A-Z</option>option>
-      </select>select>
-    </div>div>
-  
-  <div class="sector-filter" id="sf"></div>div>
-  <div class="legend"><span>Bajo</span><div class="legend-bar" id="lb"></div>div><span>Alto</span></div>div>
-  <div class="status-bar">
-    <span class="live-dot" id="statusDot"></span>
-    <span id="statusTxt">Conectando…</span>
-  </div>div>
-  <div class="grid" id="grid"></div>div>
-  <div class="tt" id="tt"></div>div>
-  
-  <script>
-    // ── Tickers base con datos estáticos de fundamentales (fallback y complemento) ──
-    // Los precios y %chg se sobreescriben con datos reales de Yahoo Finance
-    const BASE = [
-      {t:'AAPL', n:'Apple',        s:'Tech',        mktcap:3700, pe:29,   peg:2.4, pfcf:28,  ps:8.2},
-      {t:'MSFT', n:'Microsoft',    s:'Tech',        mktcap:2890, pe:30,   peg:2.1, pfcf:33,  ps:11.0},
-      {t:'NVDA', n:'NVIDIA',       s:'Tech',        mktcap:2700, pe:22,   peg:0.9, pfcf:40,  ps:15.8},
-      {t:'AMZN', n:'Amazon',       s:'Cons.Disc',   mktcap:2200, pe:33,   peg:1.7, pfcf:42,  ps:3.2},
-      {t:'GOOGL', n:'Alphabet',    s:'Comm.',       mktcap:1850, pe:19,   peg:1.0, pfcf:20,  ps:5.8},
-      {t:'META', n:'Meta',         s:'Comm.',       mktcap:1460, pe:22,   peg:1.0, pfcf:23,  ps:8.5},
-      {t:'BRK-B',n:'Berkshire',    s:'Finance',     mktcap:1040, pe:22,   peg:1.8, pfcf:null,ps:2.0},
-      {t:'LLY',  n:'Eli Lilly',    s:'Health',      mktcap:770,  pe:35,   peg:1.5, pfcf:48,  ps:16.0},
-      {t:'TSLA', n:'Tesla',        s:'Cons.Disc',   mktcap:1220, pe:88,   peg:3.5, pfcf:110, ps:7.9},
-      {t:'AVGO', n:'Broadcom',     s:'Tech',        mktcap:1500, pe:24,   peg:1.3, pfcf:21,  ps:8.8},
-      {t:'WMT',  n:'Walmart',      s:'Staples',     mktcap:790,  pe:33,   peg:2.7, pfcf:36,  ps:0.9},
-      {t:'JPM',  n:'JPMorgan',     s:'Finance',     mktcap:820,  pe:13,   peg:1.2, pfcf:null,ps:3.1},
-      {t:'V',    n:'Visa',         s:'Finance',     mktcap:710,  pe:26,   peg:1.5, pfcf:27,  ps:15.5},
-      {t:'UNH',  n:'UnitedHealth', s:'Health',      mktcap:445,  pe:15,   peg:1.2, pfcf:16,  ps:0.6},
-      {t:'XOM',  n:'ExxonMobil',   s:'Energy',      mktcap:470,  pe:13,   peg:1.7, pfcf:11,  ps:1.2},
-      {t:'MA',   n:'Mastercard',   s:'Finance',     mktcap:520,  pe:32,   peg:1.8, pfcf:34,  ps:15.0},
-      {t:'COST', n:'Costco',       s:'Staples',     mktcap:438,  pe:50,   peg:3.3, pfcf:52,  ps:1.5},
-      {t:'HD',   n:'Home Depot',   s:'Cons.Disc',   mktcap:375,  pe:24,   peg:2.0, pfcf:26,  ps:2.2},
-      {t:'PG',   n:'P&G',          s:'Staples',     mktcap:370,  pe:21,   peg:3.0, pfcf:23,  ps:4.6},
-      {t:'MRK',  n:'Merck',        s:'Health',      mktcap:220,  pe:10,   peg:0.8, pfcf:12,  ps:3.0},
-      {t:'KO',   n:'Coca-Cola',    s:'Staples',     mktcap:297,  pe:22,   peg:2.9, pfcf:24,  ps:6.0},
-      {t:'CVX',  n:'Chevron',      s:'Energy',      mktcap:280,  pe:13,   peg:1.7, pfcf:10,  ps:1.1},
-      {t:'CRM',  n:'Salesforce',   s:'Tech',        mktcap:268,  pe:27,   peg:1.5, pfcf:29,  ps:6.6},
-      {t:'ABBV', n:'AbbVie',       s:'Health',      mktcap:340,  pe:14,   peg:1.3, pfcf:15,  ps:5.0},
-      {t:'BAC',  n:'Bank of Am.',  s:'Finance',     mktcap:305,  pe:12,   peg:1.0, pfcf:null,ps:2.7},
-      {t:'NFLX', n:'Netflix',      s:'Comm.',       mktcap:393,  pe:33,   peg:1.3, pfcf:36,  ps:9.2},
-      {t:'AMD',  n:'AMD',          s:'Tech',        mktcap:328,  pe:26,   peg:0.8, pfcf:28,  ps:7.6},
-      {t:'QCOM', n:'Qualcomm',     s:'Tech',        mktcap:164,  pe:13,   peg:0.8, pfcf:12,  ps:3.8},
-      {t:'NOW',  n:'ServiceNow',   s:'Tech',        mktcap:175,  pe:52,   peg:2.0, pfcf:57,  ps:14.5},
-      {t:'MU',   n:'Micron',       s:'Tech',        mktcap:507,  pe:4.1,  peg:0.1, pfcf:null,ps:7.9},
-      {t:'INTC', n:'Intel',        s:'Tech',        mktcap:197,  pe:null, peg:null,pfcf:null,ps:1.7},
-      {t:'PLTR', n:'Palantir',     s:'Tech',        mktcap:354,  pe:175,  peg:4.5, pfcf:210, ps:58.0},
-      {t:'APP',  n:'AppLovin',     s:'Tech',        mktcap:210,  pe:42,   peg:0.9, pfcf:45,  ps:16.0},
-      {t:'ISRG', n:'Intuitive',    s:'Health',      mktcap:178,  pe:52,   peg:2.6, pfcf:55,  ps:15.5},
-      {t:'GS',   n:'Goldman',      s:'Finance',     mktcap:168,  pe:13,   peg:0.9, pfcf:null,ps:2.6},
-      {t:'IBM',  n:'IBM',          s:'Tech',        mktcap:228,  pe:19,   peg:2.2, pfcf:21,  ps:2.8},
-      {t:'ORCL', n:'Oracle',       s:'Tech',        mktcap:437,  pe:21,   peg:1.7, pfcf:26,  ps:7.0},
-      {t:'T',    n:'AT&T',         s:'Comm.',       mktcap:203,  pe:9,    peg:1.8, pfcf:6,   ps:1.0},
-      {t:'VZ',   n:'Verizon',      s:'Comm.',       mktcap:182,  pe:8,    peg:1.6, pfcf:5,   ps:1.0},
-      {t:'PFE',  n:'Pfizer',       s:'Health',      mktcap:140,  pe:8,    peg:1.1, pfcf:9,   ps:1.9},
-      {t:'GEV',  n:'GE Vernova',   s:'Industrials', mktcap:268,  pe:58,   peg:2.2, pfcf:66,  ps:5.0},
-      {t:'RTX',  n:'RTX Corp',     s:'Industrials', mktcap:172,  pe:20,   peg:1.7, pfcf:22,  ps:2.0},
-      {t:'BLK',  n:'BlackRock',    s:'Finance',     mktcap:148,  pe:19,   peg:1.5, pfcf:21,  ps:5.2},
-      {t:'SPGI', n:'S&P Global',   s:'Finance',     mktcap:143,  pe:30,   peg:1.9, pfcf:32,  ps:10.8},
-      {t:'AXP',  n:'AmEx',         s:'Finance',     mktcap:192,  pe:17,   peg:1.1, pfcf:19,  ps:3.1},
-      {t:'AMAT', n:'Applied Mat.', s:'Tech',        mktcap:127,  pe:16,   peg:1.0, pfcf:18,  ps:5.4},
-      {t:'HON',  n:'Honeywell',    s:'Industrials', mktcap:128,  pe:20,   peg:2.3, pfcf:22,  ps:3.3},
-      {t:'DE',   n:'Deere',        s:'Industrials', mktcap:116,  pe:13,   peg:1.5, pfcf:14,  ps:1.7},
-      {t:'LMT',  n:'Lockheed',     s:'Industrials', mktcap:110,  pe:16,   peg:2.0, pfcf:17,  ps:1.2},
-      {t:'UNP',  n:'Union Pacific',s:'Industrials', mktcap:145,  pe:19,   peg:2.3, pfcf:21,  ps:5.0},
-      ];
+<div class="sort-row">
+  <span>Sort:</span>
+  <select id="sortSel" onchange="renderGrid()">
+    <option value="mktcap">Mkt Cap ↓</option>
+    <option value="pe">P/E Fwd ↓</option>
+    <option value="peg">PEG ↓</option>
+    <option value="chg">% Hoy ↓</option>
+    <option value="ticker">Ticker A-Z</option>
+  </select>
+</div>
 
-    // STOCKS es el array vivo que se va actualizando con datos reales
-    let STOCKS = BASE.map(s => ({...s, price: null, chg: null}));
+<div class="sector-filter" id="sf"></div>
 
-    const MC = {
-        pe:  {low:4,  high:60, rev:true,  fmt:v=>v==null?'—':v.toFixed(0)+'x',  g:12, w:35},
-        peg: {low:.1, high:4,  rev:true,  fmt:v=>v==null?'—':v.toFixed(2),       g:1,  w:2.5},
-        pfcf:{low:5,  high:80, rev:true,  fmt:v=>v==null?'—':v.toFixed(0)+'x',  g:15, w:50},
-        ps:  {low:.3, high:20, rev:true,  fmt:v=>v==null?'—':v.toFixed(1)+'x',  g:3,  w:12},
-        chg: {low:-5, high:5,  rev:false, fmt:v=>v==null?'—':(v>0?'+':'')+v.toFixed(2)+'%', g:2, w:-1},
-    };
+<div class="legend">
+  <span>Bajo</span><div class="legend-bar" id="lb"></div><span>Alto</span>
+</div>
 
-    let metric='pe', sizeMode='equal', activeSectors=new Set();
-    let lastUpdate = null;
-    let dataSource = 'cargando';
+<div class="status-bar" id="statusTxt">Precios al cierre · 24 Mar 2026</div>
+<div class="grid" id="grid"></div>
+<div class="tt" id="tt"></div>
 
-    // ── Fetch Yahoo Finance via proxy CORS ──
-    // Probamos múltiples proxies para mayor disponibilidad
-    const CORS_PROXIES = [
-        'https://corsproxy.io/?',
-        'https://api.allorigins.win/raw?url=',
-        'https://cors.sh/',
-      ];
+<script>
+// Precios al cierre 24 Mar 2026 (fuente: Google Finance / búsqueda web)
+// chg = % cambio respecto al cierre anterior
+const STOCKS = [
+  {t:'AAPL', n:'Apple',        s:'Tech',        price:248.96, chg:0.39,  mktcap:3700, pe:29,  peg:2.4, pfcf:28,  ps:8.2},
+  {t:'MSFT', n:'Microsoft',    s:'Tech',        price:389.02, chg:0.71,  mktcap:2890, pe:30,  peg:2.1, pfcf:33,  ps:11.0},
+  {t:'NVDA', n:'NVIDIA',       s:'Tech',        price:178.56, chg:1.02,  mktcap:2700, pe:22,  peg:0.9, pfcf:40,  ps:15.8},
+  {t:'AMZN', n:'Amazon',       s:'Cons.Disc',   price:208.77, chg:0.52,  mktcap:2200, pe:33,  peg:1.7, pfcf:42,  ps:3.2},
+  {t:'GOOGL', n:'Alphabet',    s:'Comm.',       price:307.13, chg:0.18,  mktcap:1850, pe:19,  peg:1.0, pfcf:20,  ps:5.8},
+  {t:'META', n:'Meta',         s:'Comm.',       price:583.42, chg:1.10,  mktcap:1460, pe:22,  peg:1.0, pfcf:23,  ps:8.5},
+  {t:'BRK-B',n:'Berkshire',    s:'Finance',     price:478.20, chg:0.85,  mktcap:1040, pe:22,  peg:1.8, pfcf:null,ps:2.0},
+  {t:'LLY',  n:'Eli Lilly',    s:'Health',      price:812.50, chg:-0.30, mktcap:770,  pe:35,  peg:1.5, pfcf:48,  ps:16.0},
+  {t:'TSLA', n:'Tesla',        s:'Cons.Disc',   price:380.30, chg:3.18,  mktcap:1220, pe:88,  peg:3.5, pfcf:110, ps:7.9},
+  {t:'AVGO', n:'Broadcom',     s:'Tech',        price:319.85, chg:1.24,  mktcap:1500, pe:24,  peg:1.3, pfcf:21,  ps:8.8},
+  {t:'WMT',  n:'Walmart',      s:'Staples',     price:98.40,  chg:0.20,  mktcap:790,  pe:33,  peg:2.7, pfcf:36,  ps:0.9},
+  {t:'JPM',  n:'JPMorgan',     s:'Finance',     price:286.56, chg:-0.49, mktcap:820,  pe:13,  peg:1.2, pfcf:null,ps:3.1},
+  {t:'V',    n:'Visa',         s:'Finance',     price:348.90, chg:0.60,  mktcap:710,  pe:26,  peg:1.5, pfcf:27,  ps:15.5},
+  {t:'UNH',  n:'UnitedHealth', s:'Health',      price:482.30, chg:-1.87, mktcap:445,  pe:15,  peg:1.2, pfcf:16,  ps:0.6},
+  {t:'XOM',  n:'ExxonMobil',   s:'Energy',      price:107.40, chg:0.90,  mktcap:470,  pe:13,  peg:1.7, pfcf:11,  ps:1.2},
+  {t:'MA',   n:'Mastercard',   s:'Finance',     price:547.80, chg:0.75,  mktcap:520,  pe:32,  peg:1.8, pfcf:34,  ps:15.0},
+  {t:'COST', n:'Costco',       s:'Staples',     price:987.60, chg:0.45,  mktcap:438,  pe:50,  peg:3.3, pfcf:52,  ps:1.5},
+  {t:'HD',   n:'Home Depot',   s:'Cons.Disc',   price:378.90, chg:3.11,  mktcap:375,  pe:24,  peg:2.0, pfcf:26,  ps:2.2},
+  {t:'PG',   n:'P&G',          s:'Staples',     price:158.40, chg:-0.21, mktcap:370,  pe:21,  peg:3.0, pfcf:23,  ps:4.6},
+  {t:'MRK',  n:'Merck',        s:'Health',      price:87.20,  chg:0.50,  mktcap:220,  pe:10,  peg:0.8, pfcf:12,  ps:3.0},
+  {t:'KO',   n:'Coca-Cola',    s:'Staples',     price:68.90,  chg:0.10,  mktcap:297,  pe:22,  peg:2.9, pfcf:24,  ps:6.0},
+  {t:'CVX',  n:'Chevron',      s:'Energy',      price:152.30, chg:1.20,  mktcap:280,  pe:13,  peg:1.7, pfcf:10,  ps:1.1},
+  {t:'CRM',  n:'Salesforce',   s:'Tech',        price:278.40, chg:0.90,  mktcap:268,  pe:27,  peg:1.5, pfcf:29,  ps:6.6},
+  {t:'ABBV', n:'AbbVie',       s:'Health',      price:192.80, chg:0.40,  mktcap:340,  pe:14,  peg:1.3, pfcf:15,  ps:5.0},
+  {t:'BAC',  n:'Bank of Am.',  s:'Finance',     price:38.90,  chg:0.50,  mktcap:305,  pe:12,  peg:1.0, pfcf:null,ps:2.7},
+  {t:'NFLX', n:'Netflix',      s:'Comm.',       price:91.74,  chg:3.13,  mktcap:393,  pe:33,  peg:1.3, pfcf:36,  ps:9.2},
+  {t:'AMD',  n:'AMD',          s:'Tech',        price:202.62, chg:-1.00, mktcap:328,  pe:26,  peg:0.8, pfcf:28,  ps:7.6},
+  {t:'QCOM', n:'Qualcomm',     s:'Tech',        price:148.70, chg:0.80,  mktcap:164,  pe:13,  peg:0.8, pfcf:12,  ps:3.8},
+  {t:'NOW',  n:'ServiceNow',   s:'Tech',        price:842.30, chg:1.10,  mktcap:175,  pe:52,  peg:2.0, pfcf:57,  ps:14.5},
+  {t:'MU',   n:'Micron',       s:'Tech',        price:444.27, chg:3.78,  mktcap:507,  pe:4.1, peg:0.1, pfcf:null,ps:7.9},
+  {t:'INTC', n:'Intel',        s:'Tech',        price:46.18,  chg:2.55,  mktcap:197,  pe:null,peg:null,pfcf:null,ps:1.7},
+  {t:'PLTR', n:'Palantir',     s:'Tech',        price:155.68, chg:1.90,  mktcap:354,  pe:175, peg:4.5, pfcf:210, ps:58.0},
+  {t:'APP',  n:'AppLovin',     s:'Tech',        price:318.50, chg:2.20,  mktcap:210,  pe:42,  peg:0.9, pfcf:45,  ps:16.0},
+  {t:'ISRG', n:'Intuitive',    s:'Health',      price:498.40, chg:1.00,  mktcap:178,  pe:52,  peg:2.6, pfcf:55,  ps:15.5},
+  {t:'GS',   n:'Goldman',      s:'Finance',     price:498.20, chg:1.50,  mktcap:168,  pe:13,  peg:0.9, pfcf:null,ps:2.6},
+  {t:'IBM',  n:'IBM',          s:'Tech',        price:248.10, chg:0.60,  mktcap:228,  pe:19,  peg:2.2, pfcf:21,  ps:2.8},
+  {t:'ORCL', n:'Oracle',       s:'Tech',        price:158.90, chg:-0.40, mktcap:437,  pe:21,  peg:1.7, pfcf:26,  ps:7.0},
+  {t:'T',    n:'AT&T',         s:'Comm.',       price:28.40,  chg:0.20,  mktcap:203,  pe:9,   peg:1.8, pfcf:6,   ps:1.0},
+  {t:'VZ',   n:'Verizon',      s:'Comm.',       price:43.20,  chg:-0.10, mktcap:182,  pe:8,   peg:1.6, pfcf:5,   ps:1.0},
+  {t:'PFE',  n:'Pfizer',       s:'Health',      price:24.80,  chg:-0.50, mktcap:140,  pe:8,   peg:1.1, pfcf:9,   ps:1.9},
+  {t:'GEV',  n:'GE Vernova',   s:'Industrials', price:348.20, chg:2.80,  mktcap:268,  pe:58,  peg:2.2, pfcf:66,  ps:5.0},
+  {t:'RTX',  n:'RTX Corp',     s:'Industrials', price:128.40, chg:1.20,  mktcap:172,  pe:20,  peg:1.7, pfcf:22,  ps:2.0},
+  {t:'BLK',  n:'BlackRock',    s:'Finance',     price:978.30, chg:1.80,  mktcap:148,  pe:19,  peg:1.5, pfcf:21,  ps:5.2},
+  {t:'SPGI', n:'S&P Global',   s:'Finance',     price:468.90, chg:0.90,  mktcap:143,  pe:30,  peg:1.9, pfcf:32,  ps:10.8},
+  {t:'AXP',  n:'AmEx',         s:'Finance',     price:268.40, chg:1.20,  mktcap:192,  pe:17,  peg:1.1, pfcf:19,  ps:3.1},
+  {t:'AMAT', n:'Applied Mat.',  s:'Tech',        price:148.30, chg:1.40,  mktcap:127,  pe:16,  peg:1.0, pfcf:18,  ps:5.4},
+  {t:'HON',  n:'Honeywell',    s:'Industrials', price:198.40, chg:0.80,  mktcap:128,  pe:20,  peg:2.3, pfcf:22,  ps:3.3},
+  {t:'DE',   n:'Deere',        s:'Industrials', price:398.60, chg:1.50,  mktcap:116,  pe:13,  peg:1.5, pfcf:14,  ps:1.7},
+  {t:'LMT',  n:'Lockheed',     s:'Industrials', price:468.20, chg:0.60,  mktcap:110,  pe:16,  peg:2.0, pfcf:17,  ps:1.2},
+  {t:'UNP',  n:'Union Pacific', s:'Industrials', price:238.40, chg:0.70,  mktcap:145,  pe:19,  peg:2.3, pfcf:21,  ps:5.0},
+];
 
-    async function fetchYahoo(symbols) {
-        const joined = symbols.join('%2C');
-        const url = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${joined}&range=1d&interval=1d&indicators=close&includeTimestamps=false&includePrePost=false&corsDomain=finance.yahoo.com`;
+const MC = {
+  pe:  {low:4,  high:60, rev:true,  fmt:v=>v==null?'—':v.toFixed(0)+'x', g:12, w:35},
+  peg: {low:.1, high:4,  rev:true,  fmt:v=>v==null?'—':v.toFixed(2),     g:1,  w:2.5},
+  pfcf:{low:5,  high:80, rev:true,  fmt:v=>v==null?'—':v.toFixed(0)+'x', g:15, w:50},
+  ps:  {low:.3, high:20, rev:true,  fmt:v=>v==null?'—':v.toFixed(1)+'x', g:3,  w:12},
+  chg: {low:-5, high:5,  rev:false, fmt:v=>v==null?'—':(v>0?'+':'')+v.toFixed(2)+'%', g:2, w:-1},
+};
 
-        // también intentamos el endpoint v7 para quote data (precio, chg, mktcap, PE, etc.)
-        const quoteUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${joined}&fields=regularMarketPrice,regularMarketChangePercent,marketCap,forwardPE,priceToSalesTrailing12Months,trailingPE`;
+let metric='pe', sizeMode='equal', activeSectors=new Set();
 
-        for (const proxy of CORS_PROXIES) {
-              try {
-                      const r = await fetch(proxy + encodeURIComponent(quoteUrl), {signal: AbortSignal.timeout(8000)});
-                      if (!r.ok) continue;
-                      const data = await r.json();
-                      if (data?.quoteResponse?.result) return {ok:true, results: data.quoteResponse.result, proxy};
-                      // allorigins envuelve en .contents
-                      if (data?.contents) {
-                                const inner = JSON.parse(data.contents);
-                                if (inner?.quoteResponse?.result) return {ok:true, results: inner.quoteResponse.result, proxy};
-                      }
-              } catch(e) { continue; }
-        }
-        return {ok:false};
-    }
+function col(val,cfg){
+  if(val==null) return '#1c1c1c';
+  const n=Math.max(0,Math.min(1,(val-cfg.low)/(cfg.high-cfg.low)));
+  const x=cfg.rev?n:1-n;
+  if(x<0.2)  return'#145a32';
+  if(x<0.38) return'#1e8449';
+  if(x<0.55) return'#7d6608';
+  if(x<0.72) return'#922b21';
+  return'#641e16';
+}
 
-    // Fetch en lotes de 10 para no saturar la API
-    async function fetchAllData() {
-        setStatus('loading');
-        const BATCH = 10;
-        const tickers = STOCKS.map(s => s.t);
-        let anySuccess = false;
+function getSorted(){
+  const sel=document.getElementById('sortSel').value;
+  let arr=STOCKS.filter(s=>activeSectors.size===0||activeSectors.has(s.s));
+  if(sel==='mktcap') arr.sort((a,b)=>b.mktcap-a.mktcap);
+  else if(sel==='ticker') arr.sort((a,b)=>a.t.localeCompare(b.t));
+  else if(sel==='chg') arr.sort((a,b)=>(b.chg??-999)-(a.chg??-999));
+  else arr.sort((a,b)=>(b[sel]??-999)-(a[sel]??-999));
+  return arr;
+}
 
-        for (let i = 0; i < tickers.length; i += BATCH) {
-              const batch = tickers.slice(i, i + BATCH);
-              const res = await fetchYahoo(batch);
-              if (res.ok && res.results.length > 0) {
-                      anySuccess = true;
-                      res.results.forEach(q => {
-                                const st = STOCKS.find(s => s.t === q.symbol);
-                                if (!st) return;
-                                if (q.regularMarketPrice != null)          st.price   = q.regularMarketPrice;
-                                if (q.regularMarketChangePercent != null)   st.chg     = q.regularMarketChangePercent;
-                                if (q.marketCap != null)                    st.mktcap  = Math.round(q.marketCap / 1e9);
-                                if (q.forwardPE != null)                    st.pe      = parseFloat(q.forwardPE.toFixed(1));
-                                if (q.priceToSalesTrailing12Months != null) st.ps      = parseFloat(q.priceToSalesTrailing12Months.toFixed(2));
-                      });
-              }
-              }
+function renderGrid(){
+  const cfg=MC[metric];
+  const arr=getSorted();
+  document.getElementById('grid').innerHTML=arr.map(s=>{
+    const val=s[metric];
+    const bg=col(val,cfg);
+    const pr='$'+s.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const cc=s.chg>0?'#2ecc71':s.chg<0?'#e74c3c':'#777';
+    const chgStr=(s.chg>0?'+':'')+s.chg.toFixed(2)+'%';
+    return`<div class="cell" style="background:${bg}"
+      onmouseenter="showTT(event,'${s.t}')" onmouseleave="hideTT()">
+      <div><div class="cell-ticker">${s.t}</div><div class="cell-name">${s.n}</div></div>
+      <div>
+        <div class="cell-val">${cfg.fmt(val)}</div>
+        <div class="cell-bot">
+          <span class="cell-price">${pr}</span>
+          <span class="cell-chg" style="color:${cc}">${chgStr}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-        if (anySuccess) {
-              lastUpdate = new Date();
-              dataSource = 'Yahoo Finance';
-              setStatus('ok');
-              document.getElementById('apiNotice').style.display = 'none';
-        } else {
-              setStatus('error');
-              document.getElementById('apiNotice').style.display = 'block';
-              // Usa datos fallback del cierre anterior si no hay precios aún
-              STOCKS.forEach(s => {
-                      if (s.price == null) s.price = 0;
-                      if (s.chg == null)   s.chg   = 0;
-              });
-        }
+function renderLegend(){
+  const cfg=MC[metric];
+  document.getElementById('lb').innerHTML=[0,.2,.4,.6,.8,1].map(n=>
+    `<div class="lseg" style="background:${col(cfg.low+n*(cfg.high-cfg.low),cfg)}"></div>`
+  ).join('');
+}
 
-        renderGrid();
-        updateSubtitle();
-    }
+function renderSectors(){
+  const secs=[...new Set(STOCKS.map(s=>s.s))].sort();
+  document.getElementById('sf').innerHTML=
+    `<div class="sf active" onclick="toggleSec('ALL',this)">Todos</div>`+
+    secs.map(s=>`<div class="sf" onclick="toggleSec('${s}',this)">${s}</div>`).join('');
+}
 
-    function setStatus(state) {
-        const dot = document.getElementById('statusDot');
-        const txt = document.getElementById('statusTxt');
-        if (state === 'loading') {
-              dot.className = 'live-dot';
-              dot.style.background = '#f39c12';
-              txt.textContent = 'Actualizando datos…';
-        } else if (state === 'ok') {
-              dot.className = 'live-dot';
-              dot.style.background = '#2ecc71';
-              txt.textContent = `Datos en vivo · ${dataSource} · ${fmtTime(lastUpdate)}`;
-        } else {
-              dot.className = 'live-dot err-dot';
-              dot.style.background = '#e74c3c';
-              txt.textContent = 'Error de conexión · mostrando datos de referencia';
-        }
-    }
+function toggleSec(s,el){
+  if(s==='ALL'){
+    activeSectors.clear();
+    document.querySelectorAll('.sf').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+  } else {
+    document.querySelector('.sf').classList.remove('active');
+    el.classList.toggle('active');
+    activeSectors.has(s)?activeSectors.delete(s):activeSectors.add(s);
+    if(activeSectors.size===0) document.querySelector('.sf').classList.add('active');
+  }
+  renderGrid();
+}
 
-    function updateSubtitle() {
-        const d = lastUpdate ? lastUpdate.toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'}) : '—';
-        document.getElementById('subtitleTxt').textContent =
-              `Top 50 · Datos: ${dataSource} · ${d}`;
-    }
+function setMetric(m,el){
+  metric=m;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid(); renderLegend();
+}
 
-    function fmtTime(d) {
-        if (!d) return '—';
-        return d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    }
+function setSize(m,el){
+  sizeMode=m;
+  document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
 
-    // ── Auto-refresh cada 60 seg ──
-    setInterval(fetchAllData, 60000);
+function showTT(e,ticker){
+  const s=STOCKS.find(x=>x.t===ticker);
+  const v=(val,g,w,rev)=>{
+    if(val==null) return'<span style="color:#444">N/D</span>';
+    const cls=rev?(val<=g?'g':val<=w?'w':'b'):(val>=g?'g':val>=w?'w':'b');
+    return`<span class="${cls}">${val}</span>`;
+  };
+  const cc=s.chg>0?'#2ecc71':s.chg<0?'#e74c3c':'#888';
+  document.getElementById('tt').innerHTML=`
+    <div class="tt-head">${s.t} · ${s.n}</div>
+    <div class="tt-sub">${s.s} · Mkt Cap $${s.mktcap}B</div>
+    <div class="tt-row"><span class="tt-l">Precio</span><span>$${s.price.toFixed(2)} <span style="color:${cc}">${s.chg>0?'+':''}${s.chg.toFixed(2)}%</span></span></div>
+    <div class="tt-row"><span class="tt-l">P/E Forward</span><span>${v(s.pe,12,35,true)}x</span></div>
+    <div class="tt-row"><span class="tt-l">PEG</span><span>${v(s.peg,1,2.5,true)}</span></div>
+    <div class="tt-row"><span class="tt-l">P/FCF</span><span>${v(s.pfcf,15,50,true)}x</span></div>
+    <div class="tt-row"><span class="tt-l">P/Sales</span><span>${v(s.ps,3,12,true)}x</span></div>
+  `;
+  document.getElementById('tt').style.display='block';
+  moveTT(e);
+}
 
-    // ── Rendering ──
-    function col(val, cfg) {
-        if (val == null) return '#1c1c1c';
-        const n = Math.max(0, Math.min(1, (val - cfg.low) / (cfg.high - cfg.low)));
-        const x = cfg.rev ? n : 1 - n;
-      if (x < 0.2)  return '#145a32';
-        if (x < 0.38) return '#1e8449';
-        if (x < 0.55) return '#7d6608';
-        if (x < 0.72) return '#922b21';
-        return '#641e16';
-    }
+document.addEventListener('mousemove',moveTT);
+function moveTT(e){
+  const tt=document.getElementById('tt');
+  if(tt.style.display!=='block') return;
+  tt.style.left=Math.min(e.clientX+14,window.innerWidth-230)+'px';
+  tt.style.top=Math.max(4,e.clientY-20)+'px';
+}
+function hideTT(){ document.getElementById('tt').style.display='none'; }
 
-    function getSorted() {
-        const sel = document.getElementById('sortSel').value;
-        let arr = STOCKS.filter(s => activeSectors.size === 0 || activeSectors.has(s.s));
-        if      (sel === 'mktcap')  arr.sort((a,b) => b.mktcap - a.mktcap);
-        else if (sel === 'ticker')  arr.sort((a,b) => a.t.localeCompare(b.t));
-        else if (sel === 'chg')     arr.sort((a,b) => (b.chg??-999) - (a.chg??-999));
-        else                         arr.sort((a,b) => (b[sel]??-999) - (a[sel]??-999));
-        return arr;
-    }
-
-    function renderGrid() {
-        const cfg = MC[metric];
-        const arr = getSorted();
-        document.getElementById('grid').innerHTML = arr.map(s => {
-              const val = s[metric];
-              const bg  = col(val, cfg);
-              const pr  = s.price != null ? '$' + s.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-            const chg = s.chg ?? 0;
-              const cc  = chg > 0 ? '#2ecc71' : chg < 0 ? '#e74c3c' : '#777';
-              const chgStr = s.chg != null ? (chg > 0 ? '+' : '') + chg.toFixed(2) + '%' : '—';
-        return `<div class="cell" style="background:${bg}" onmouseenter="showTT(event,'${s.t}')" onmouseleave="hideTT()">
-              <div><div class="cell-ticker">${s.t}</div><div class="cell-name">${s.n}</div></div>
-                    <div>
-                            <div class="cell-val">${cfg.fmt(val)}</div>
-                                    <div class="cell-bot">
-                                              <span class="cell-price">${pr}</span>
-                                                        <span class="cell-chg" style="color:${cc}">${chgStr}</span>
-          </div>
-                </div>
-                    </div>`;
-        }).join('');
-    }
-
-    function renderSkeletons() {
-                  document.getElementById('grid').innerHTML =
-                        Array(50).fill('<div class="skeleton"></div>').join('');
-       }
-
-       function renderLegend() {
-           const cfg = MC[metric];
-        document.getElementById('lb').innerHTML = [0,.2,.4,.6,.8,1].map(n =>
-              `<div class="lseg" style="background:${col(cfg.low + n*(cfg.high - cfg.low), cfg)}"></div>`
-                                                                          ).join('');
-       }
-
-       function renderSectors() {
-           const secs = [...new Set(BASE.map(s => s.s))].sort();
-           document.getElementById('sf').innerHTML =
-                 `<div class="sf active" onclick="toggleSec('ALL',this)">Todos</div>` +
-                 secs.map(s => `<div class="sf" onclick="toggleSec('${s}',this)">${s}</div>`).join('');
-       }
-
-    function toggleSec(s, el) {
-        if (s === 'ALL') {
-              activeSectors.clear();
-              document.querySelectorAll('.sf').forEach(e => e.classList.remove('active'));
-              el.classList.add('active');
-        } else {
-              document.querySelector('.sf').classList.remove('active');
-              el.classList.toggle('active');
-              activeSectors.has(s) ? activeSectors.delete(s) : activeSectors.add(s);
-              if (activeSectors.size === 0) document.querySelector('.sf').classList.add('active');
-        }
-        renderGrid();
-    }
-
-    function setMetric(m, el) {
-        metric = m;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        renderGrid();
-        renderLegend();
-    }
-
-    function setSize(m, el) {
-        sizeMode = m;
-        document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function showTT(e, ticker) {
-        const s = STOCKS.find(x => x.t === ticker);
-        const v = (val, g, w, rev) => {
-              if (val == null) return '<span style="color:#444">N/D</span>';
-              const cls = rev ? (val<=g?'g':val<=w?'w':'b') : (val>=g?'g':val>=w?'w':'b');
-              return `<span class="${cls}">${val}</span>`;
-        };
-        const cc = (s.chg??0) > 0 ? '#2ecc71' : (s.chg??0) < 0 ? '#e74c3c' : '#888';
-        const prStr = s.price != null ? '$'+s.price.toFixed(2) : '—';
-        const chgStr = s.chg != null ? (s.chg>0?'+':'')+s.chg.toFixed(2)+'%' : '—';
-        document.getElementById('tt').innerHTML = `
-            <div class="tt-head">${s.t} · ${s.n}</div>
-                <div class="tt-sub">${s.s} · Mkt Cap $${s.mktcap}B</div>
-                    <div class="tt-row"><span class="tt-l">Precio</span><span>${prStr} <span style="color:${cc}">${chgStr}</span></span></div>
-                        <div class="tt-row"><span class="tt-l">P/E Forward</span><span>${v(s.pe,12,35,true)}x</span></div>
-                            <div class="tt-row"><span class="tt-l">PEG</span><span>${v(s.peg,1,2.5,true)}</span></div>
-                                <div class="tt-row"><span class="tt-l">P/FCF</span><span>${v(s.pfcf,15,50,true)}x</span></div>
-                                    <div class="tt-row"><span class="tt-l">P/Sales</span><span>${v(s.ps,3,12,true)}x</span></div>
-                                        <div class="tt-row"><span class="tt-l">Fuente</span><span style="color:#444">${dataSource}</span></div>
-                                          `;
-        document.getElementById('tt').style.display = 'block';
-        moveTT(e);
-    }
-
-    document.addEventListener('mousemove', moveTT);
-    function moveTT(e) {
-        const tt = document.getElementById('tt');
-        if (tt.style.display !== 'block') return;
-        tt.style.left = Math.min(e.clientX+14, window.innerWidth-230)+'px';
-        tt.style.top  = Math.max(4, e.clientY-20)+'px';
-    }
-    function hideTT() { document.getElementById('tt').style.display='none'; }
-
-       // ── Init ──
-    renderSectors();
-    renderLegend();
-    renderSkeletons();
-    setStatus('loading');
-    fetchAllData();
-  </script>
-  </body>
-</html>html>
-  </script></span></span>
-  </body>
-  </style></title>
-  </head>
+renderSectors(); renderLegend(); renderGrid();
+</script>
+</body>
+</html>
